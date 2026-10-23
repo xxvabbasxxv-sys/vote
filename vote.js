@@ -29,6 +29,8 @@ async function snapshot(p, who) {
   return { id: p.id, counts, mine: mine || null };
 }
 
+const isClosed = p => p.closed || (p.endsAt && Date.now() > Date.parse(p.endsAt));
+
 module.exports = async (req, res) => {
   res.setHeader('Cache-Control', 'no-store');
   if (!URL_ || !TOKEN) return res.status(503).json({ error: 'no_db' });
@@ -37,10 +39,12 @@ module.exports = async (req, res) => {
     if (req.method === 'POST') {
       const { poll, option } = req.body || {};
       const p = polls.find(x => x.id === poll);
-      if (!p || p.closed || !p.options.some(o => o.id === option)) return res.status(400).json({ error: 'bad_vote' });
+      if (!p || isClosed(p) || !p.options.some(o => o.id === option)) return res.status(400).json({ error: 'bad_vote' });
       // نسجل الصوت الجديد ونرجع الصوت القديم (لو موجود) عشان ننقل العدّ من خيار لخيار
-      const [prev] = await redis([['SET', `voted:${p.id}:${who}`, option, 'GET']]);
+      const key = `voted:${p.id}:${who}`;
+      const [prev] = await redis([['GET', key]]);
       if (prev !== option) {
+        await redis([['SET', key, option]]);
         const cmds = [['HINCRBY', `votes:${p.id}`, option, 1]];
         if (prev && p.options.some(o => o.id === prev)) cmds.push(['HINCRBY', `votes:${p.id}`, prev, -1]);
         await redis(cmds);
@@ -49,7 +53,7 @@ module.exports = async (req, res) => {
     }
     const out = [];
     for (const p of polls) out.push(await snapshot(p, who));
-    res.json({ polls, results: out });
+    res.json({ polls: polls.map(p => ({ ...p, closed: !!isClosed(p) })), results: out, now: Date.now() });
   } catch (e) {
     res.status(500).json({ error: 'server' });
   }

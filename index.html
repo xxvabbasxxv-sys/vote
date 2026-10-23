@@ -22,7 +22,7 @@
       var(--bg);
     color:var(--text); font-family:'Tajawal',sans-serif; line-height:1.75; min-height:100vh;
   }
-  main{max-width:720px; margin:0 auto; padding:56px 20px 90px;}
+  main{position:relative; max-width:720px; margin:0 auto; padding:56px 20px 90px;}
   .brand{display:flex; align-items:center; gap:14px; justify-content:center; margin-bottom:34px;}
   .brand img{width:52px; height:52px; border-radius:50%; object-fit:cover; border:2px solid var(--border-strong);}
   .brand b{font-size:20px; font-weight:900; letter-spacing:2px; color:var(--light);}
@@ -55,14 +55,54 @@
     background:linear-gradient(180deg,var(--light),var(--primary)); color:#05070a; border:0;
   }
   .go:disabled{opacity:.35; cursor:not-allowed;}
+  .timer{margin:0 0 20px; padding:14px; border:1px solid var(--border); border-radius:12px; background:rgba(234,246,255,.04);}
+  .tu{display:flex; gap:10px;}
+  .tu div{flex:1; text-align:center; background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 4px;}
+  .tu b{display:block; font-size:24px; font-weight:900; color:var(--light); font-variant-numeric:tabular-nums; line-height:1.4;}
+  .tu small{color:var(--muted); font-size:12px;}
+  .te{display:block; margin-top:10px; font-size:12.5px; color:var(--gold); text-align:center;}
   .tag{color:var(--gold); font-weight:700;}
   em{font-style:normal; font-size:12px; color:var(--gold); margin-inline-start:8px;}
   .msg{border:1px dashed var(--border-strong); border-radius:12px; padding:16px 20px; text-align:center; color:var(--muted);}
+  /* ---- اليدين والحبتين ---- */
+  .pills{display:flex; justify-content:center; gap:30px; margin:-8px 0 34px; pointer-events:none;}
+  .hand{--c:#b06bff; width:112px; text-align:center;}
+  .hand.blue{--c:#5ccfff;}
+  .hname{font-size:26px; font-weight:900; letter-spacing:.12em; color:var(--c); text-shadow:0 0 18px var(--c); line-height:1.2; margin-bottom:6px;}
+  .hsvg{width:100%; display:block; -webkit-mask-image:linear-gradient(#000 70%, transparent); mask-image:linear-gradient(#000 70%, transparent);}
+  .hand.blue .hsvg{transform:scaleX(-1);}
+  .edge{fill:none; stroke:var(--c); stroke-width:6; stroke-linejoin:round; opacity:.75;}
+  .skin{fill:url(#skin);}
+  .glow{fill:var(--c); opacity:.12;}
+  .pill-body{fill:var(--c);}
+  .bob{animation:bob 4s ease-in-out infinite;}
+  @keyframes bob{0%,100%{transform:translateY(0);} 50%{transform:translateY(-5px);}}
+  @media (min-width:1180px){
+    .pills{display:block; height:0; margin:0;}
+    .hand{position:absolute; top:230px; width:190px;}
+    .hand.purple{left:calc(100% + 28px);}
+    .hand.blue{right:calc(100% + 28px);}
+    .hname{font-size:36px;}
+  }
   :focus-visible{outline:2px solid var(--light); outline-offset:2px;}
   @media (prefers-reduced-motion:reduce){*{transition:none !important;}}
 </style>
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="skin" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#22324a"/><stop offset="1" stop-color="#0e1622"/></linearGradient>
+    <g id="handShape">
+      <rect x="72" y="170" width="56" height="80" rx="12"/>
+      <rect x="48" y="96" width="104" height="100" rx="30"/>
+      <rect x="52" y="34" width="22" height="80" rx="11"/>
+      <rect x="78" y="18" width="22" height="96" rx="11"/>
+      <rect x="104" y="26" width="22" height="88" rx="11"/>
+      <rect x="130" y="50" width="20" height="66" rx="10"/>
+      <rect x="20" y="112" width="24" height="70" rx="12" transform="rotate(-38 32 147)"/>
+    </g>
+  </defs>
+</svg>
 <main>
   <div class="brand">
     <img src="https://i.ibb.co/d0QxHd04/magic-edit-TUFIUUhk-VFl5-Ykkj-MSNi-OTVh-MTg0-NWQ2-YTZl-ODgx-Mm-Qz-Mj-Fl-ZWJh-NWQy-ZDNm-MSMx-Mj-E2-Iy-NUU.png" alt="شعار Elite State">
@@ -70,11 +110,62 @@
   </div>
   <h1>صوتك يقرر</h1>
   <p class="sub">لكل شخص صوت واحد، وتقدر تغيّره بأي وقت.</p>
+  <div class="pills" aria-hidden="true">
+    <div class="hand purple">
+      <div class="hname">CL</div>
+      <svg class="hsvg" viewBox="0 0 200 250">
+        <use href="#handShape" class="edge"/>
+        <use href="#handShape" class="skin"/>
+        <g class="bob"><g transform="translate(100 148)">
+          <circle r="48" class="glow"/>
+          <g transform="rotate(-28)">
+            <rect class="pill-body" x="-30" y="-14" width="60" height="28" rx="14"/>
+            <rect x="-24" y="-10" width="34" height="7" rx="3.5" fill="#fff" opacity=".4"/>
+            <rect x="-1" y="-14" width="2" height="28" fill="#000" opacity=".25"/>
+          </g>
+        </g></g>
+      </svg>
+    </div>
+    <div class="hand blue">
+      <div class="hname">EL</div>
+      <svg class="hsvg" viewBox="0 0 200 250">
+        <use href="#handShape" class="edge"/>
+        <use href="#handShape" class="skin"/>
+        <g class="bob"><g transform="translate(100 148)">
+          <circle r="48" class="glow"/>
+          <g transform="rotate(-28)">
+            <rect class="pill-body" x="-30" y="-14" width="60" height="28" rx="14"/>
+            <rect x="-24" y="-10" width="34" height="7" rx="3.5" fill="#fff" opacity=".4"/>
+            <rect x="-1" y="-14" width="2" height="28" fill="#000" opacity=".25"/>
+          </g>
+        </g></g>
+      </svg>
+    </div>
+  </div>
   <div id="polls"></div>
 </main>
 
 <script>
-  let polls = [], state = {}, failed = false, failCode = '';
+  let polls = [], state = {}, failed = false, failCode = '', offset = 0, bestRtt = Infinity;
+  const now = () => Date.now() + offset;
+  const unitsHtml = ms => {
+    const t = Math.max(0, Math.ceil(ms / 1000));
+    return [['يوم', Math.floor(t / 86400)], ['ساعة', Math.floor(t % 86400 / 3600)], ['دقيقة', Math.floor(t % 3600 / 60)], ['ثانية', t % 60]]
+      .map(([l, n]) => `<div><b>${String(n).padStart(2, '0')}</b><small>${l}</small></div>`).join('');
+  };
+  const endLabel = iso => new Date(iso).toLocaleString('ar-u-nu-latn', {timeZone: 'Asia/Riyadh', weekday: 'long', day: 'numeric', month: 'long', hour: 'numeric', minute: '2-digit'});
+  const timerHtml = p => `<div class="timer" data-end="${p.endsAt}"><div class="tu">${unitsHtml(Date.parse(p.endsAt) - now())}</div><span class="te">ينتهي ${endLabel(p.endsAt)} بتوقيت مكة المكرمة</span></div>`;
+  function tick(){
+    document.querySelectorAll('.timer').forEach(el => {
+      const left = Date.parse(el.dataset.end) - now();
+      if(left <= 0){
+        polls.filter(x => x.endsAt === el.dataset.end).forEach(x => x.closed = true);
+        render(); refresh();
+        return;
+      }
+      el.querySelector('.tu').innerHTML = unitsHtml(left);
+    });
+  }
   const box = document.getElementById('polls');
 
   function card(p){
@@ -97,7 +188,7 @@
       : voted
         ? `<span>${total} صوت</span><span class="tag">اضغط على أي خيار لتغيير صوتك</span>`
         : `<span>اختر خيارك عشان تشوف النتائج</span>`;
-    return `<article class="poll"><h2>${p.question}</h2><div class="opts">${rows}</div><div class="foot">${foot}</div></article>`;
+    return `<article class="poll"><h2>${p.question}</h2>${p.endsAt && !p.closed ? timerHtml(p) : ''}<div class="opts">${rows}</div><div class="foot">${foot}</div></article>`;
   }
 
   function render(){
@@ -112,9 +203,15 @@
 
   async function refresh(){
     try{
-      const r = await fetch('/api/vote');
+      const t0 = Date.now();
+      const r = await fetch('/api/vote', {cache: 'no-store'});
       if(!r.ok) throw new Error(r.status);
       const d = await r.json();
+      const t1 = Date.now();
+      if(d.now && (t1 - t0) <= bestRtt * 1.25 + 40){
+        bestRtt = Math.min(bestRtt, t1 - t0);
+        offset = d.now - (t0 + t1) / 2;
+      }
       polls = d.polls;
       d.results.forEach(s => state[s.id] = s);
       failed = false;
@@ -142,6 +239,11 @@
   render();
   refresh();
   setInterval(refresh, 20000);
+  (function loop(){
+    tick();
+    setTimeout(loop, 1000 - (now() % 1000) + 5); // يصحى مع بداية كل ثانية من ساعة الخادم
+  })();
+  document.addEventListener('visibilitychange', () => { if(!document.hidden){ tick(); refresh(); } });
 </script>
 </body>
 </html>
