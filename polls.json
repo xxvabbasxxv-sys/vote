@@ -1,23 +1,17 @@
 [
   {
-    "id": "next-job",
-    "question": "أي وظيفة تبي نفتح التقديم عليها أول؟",
+    "id": "respect",
+    "question": "تبي نغيّر ملفات السيرفر إلى Respect؟",
     "closed": false,
     "options": [
-      { "id": "ems", "label": "الإسعاف والطوارئ" },
-      { "id": "mechanic", "label": "الميكانيكي" },
-      { "id": "lawyer", "label": "المحاماة" },
-      { "id": "media", "label": "الإعلام" }
-    ]
-  },
-  {
-    "id": "weekly-event",
-    "question": "أي فعالية تبيها هذا الأسبوع؟",
-    "closed": false,
-    "options": [
-      { "id": "race", "label": "سباق شوارع" },
-      { "id": "heist", "label": "سرقة كبرى" },
-      { "id": "auction", "label": "مزاد سيارات" }
+      {
+        "id": "yes",
+        "label": "إي، نغيّر الملفات إلى Respect"
+      },
+      {
+        "id": "no",
+        "label": "لا، نخليها مثل ما هي"
+      }
     ]
   }
 ]

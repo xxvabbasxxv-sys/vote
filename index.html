@@ -56,6 +56,7 @@
   }
   .go:disabled{opacity:.35; cursor:not-allowed;}
   .tag{color:var(--gold); font-weight:700;}
+  em{font-style:normal; font-size:12px; color:var(--gold); margin-inline-start:8px;}
   .msg{border:1px dashed var(--border-strong); border-radius:12px; padding:16px 20px; text-align:center; color:var(--muted);}
   :focus-visible{outline:2px solid var(--light); outline-offset:2px;}
   @media (prefers-reduced-motion:reduce){*{transition:none !important;}}
@@ -68,31 +69,34 @@
     <b>ELITE STATE</b>
   </div>
   <h1>صوتك يقرر</h1>
-  <p class="sub">لكل شخص صوت واحد في كل تصويت، والنتائج تظهر بعد ما تصوّت.</p>
+  <p class="sub">لكل شخص صوت واحد، وتقدر تغيّره بأي وقت.</p>
   <div id="polls"></div>
 </main>
 
 <script>
   let polls = [], state = {}, failed = false, failCode = '';
-  const sel = {};
   const box = document.getElementById('polls');
 
   function card(p){
     const s = state[p.id];
     const total = s ? Object.values(s.counts).reduce((a, b) => a + b, 0) : 0;
-    const show = p.closed || !!(s && s.mine);
+    const voted = !!(s && s.mine);
     const rows = p.options.map(o => {
-      if(show){
-        const c = s ? (s.counts[o.id] || 0) : 0;
-        const pct = total ? Math.round(c * 100 / total) : 0;
-        const mine = s && s.mine === o.id;
-        return `<div class="opt res ${mine ? 'mine' : ''}"><i style="width:${pct}%"></i><span>${o.label}</span><b>${pct}%</b></div>`;
+      const data = p.closed ? '' : `data-p="${p.id}" data-o="${o.id}"`;
+      if(!voted && !p.closed){
+        return `<button class="opt" ${data}><span>${o.label}</span></button>`;
       }
-      return `<button class="opt ${sel[p.id] === o.id ? 'on' : ''}" data-p="${p.id}" data-o="${o.id}"><span>${o.label}</span></button>`;
+      const c = s ? (s.counts[o.id] || 0) : 0;
+      const pct = total ? Math.round(c * 100 / total) : 0;
+      const mine = voted && s.mine === o.id;
+      const tag = p.closed ? 'div' : 'button';
+      return `<${tag} class="opt res ${mine ? 'mine' : ''}" ${data}><i style="width:${pct}%"></i><span>${o.label}${mine ? '<em>صوتك</em>' : ''}</span><b>${pct}%</b></${tag}>`;
     }).join('');
-    const foot = show
-      ? `<span>${total} صوت</span>${p.closed ? '<span class="tag">انتهى التصويت</span>' : '<span class="tag">تم تسجيل صوتك</span>'}`
-      : `<span>اختر خيار واحد</span><button class="go" data-go="${p.id}" ${sel[p.id] ? '' : 'disabled'}>سجّل صوتي</button>`;
+    const foot = p.closed
+      ? `<span>${total} صوت</span><span class="tag">انتهى التصويت</span>`
+      : voted
+        ? `<span>${total} صوت</span><span class="tag">اضغط على أي خيار لتغيير صوتك</span>`
+        : `<span>اختر خيارك عشان تشوف النتائج</span>`;
     return `<article class="poll"><h2>${p.question}</h2><div class="opts">${rows}</div><div class="foot">${foot}</div></article>`;
   }
 
@@ -120,15 +124,14 @@
 
   box.addEventListener('click', async e => {
     const o = e.target.closest('[data-o]');
-    if(o){ sel[o.dataset.p] = o.dataset.o; return render(); }
-    const g = e.target.closest('[data-go]');
-    if(!g || g.disabled) return;
-    g.disabled = true;
-    const id = g.dataset.go;
+    if(!o) return;
+    const id = o.dataset.p, opt = o.dataset.o;
+    if(state[id] && state[id].mine === opt) return;
+    o.disabled = true;
     try{
       const r = await fetch('/api/vote', {
         method: 'POST', headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({poll: id, option: sel[id]})
+        body: JSON.stringify({poll: id, option: opt})
       });
       if(!r.ok) throw new Error(r.status);
       state[id] = await r.json();
