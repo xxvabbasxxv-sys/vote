@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Elite State | التصويت</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#05070a; --panel:#0c121a; --panel2:#111925;
+    --primary:#9bd9ff; --gold:#c9a24b; --light:#eaf6ff;
+    --text:#e9f1f8; --muted:#7c8ca0;
+    --border:rgba(155,217,255,.16); --border-strong:rgba(155,217,255,.34);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:
+      radial-gradient(60% 420px at 50% -80px, rgba(234,246,255,.16), transparent 70%),
+      radial-gradient(40% 300px at 85% 0, rgba(155,217,255,.10), transparent 70%),
+      var(--bg);
+    color:var(--text); font-family:'Tajawal',sans-serif; line-height:1.75; min-height:100vh;
+  }
+  main{max-width:720px; margin:0 auto; padding:56px 20px 90px;}
+  .brand{display:flex; align-items:center; gap:14px; justify-content:center; margin-bottom:34px;}
+  .brand img{width:52px; height:52px; border-radius:50%; object-fit:cover; border:2px solid var(--border-strong);}
+  .brand b{font-size:20px; font-weight:900; letter-spacing:2px; color:var(--light);}
+  h1{font-size:clamp(30px,6vw,46px); font-weight:900; text-align:center; color:var(--light); text-shadow:0 0 36px rgba(234,246,255,.25);}
+  .sub{text-align:center; color:var(--muted); margin:10px 0 40px;}
+  .poll{
+    background:linear-gradient(180deg,var(--panel2),var(--panel));
+    border:1px solid var(--border); border-top:1px solid rgba(234,246,255,.45);
+    border-radius:16px; padding:26px 24px 20px; margin-bottom:22px;
+  }
+  .poll h2{font-size:19px; font-weight:800; margin-bottom:18px;}
+  .opts{display:flex; flex-direction:column; gap:10px;}
+  .opt{
+    position:relative; overflow:hidden; display:flex; align-items:center; justify-content:space-between; gap:12px;
+    width:100%; padding:14px 18px; border-radius:11px; font:inherit; font-weight:700; font-size:15px; text-align:right;
+    background:var(--bg); color:var(--text); border:1px solid var(--border);
+  }
+  button.opt{cursor:pointer; transition:border-color .15s, background .15s;}
+  button.opt:hover{border-color:var(--primary);}
+  button.opt.on{border-color:var(--light); background:rgba(234,246,255,.10); color:var(--light);}
+  .opt span,.opt b{position:relative; z-index:1;}
+  .res i{position:absolute; inset:0 auto 0 0; background:rgba(155,217,255,.16); transition:width .6s ease;}
+  .res.mine{border-color:var(--light);}
+  .res.mine i{background:linear-gradient(90deg,rgba(201,162,75,.30),rgba(234,246,255,.38));}
+  .res b{color:var(--primary); font-variant-numeric:tabular-nums;}
+  .res.mine b{color:var(--light);}
+  .foot{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:16px; color:var(--muted); font-size:13px;}
+  .go{
+    font:inherit; font-weight:800; font-size:14px; padding:10px 26px; border-radius:10px; cursor:pointer;
+    background:linear-gradient(180deg,var(--light),var(--primary)); color:#05070a; border:0;
+  }
+  .go:disabled{opacity:.35; cursor:not-allowed;}
+  .tag{color:var(--gold); font-weight:700;}
+  .msg{border:1px dashed var(--border-strong); border-radius:12px; padding:16px 20px; text-align:center; color:var(--muted);}
+  :focus-visible{outline:2px solid var(--light); outline-offset:2px;}
+  @media (prefers-reduced-motion:reduce){*{transition:none !important;}}
+</style>
+</head>
+<body>
+<main>
+  <div class="brand">
+    <img src="https://i.ibb.co/d0QxHd04/magic-edit-TUFIUUhk-VFl5-Ykkj-MSNi-OTVh-MTg0-NWQ2-YTZl-ODgx-Mm-Qz-Mj-Fl-ZWJh-NWQy-ZDNm-MSMx-Mj-E2-Iy-NUU.png" alt="شعار Elite State">
+    <b>ELITE STATE</b>
+  </div>
+  <h1>صوتك يقرر</h1>
+  <p class="sub">لكل شخص صوت واحد في كل تصويت، والنتائج تظهر بعد ما تصوّت.</p>
+  <div id="polls"></div>
+</main>
+
+<script>
+  let polls = [], state = {}, failed = false, failCode = '';
+  const sel = {};
+  const box = document.getElementById('polls');
+
+  function card(p){
+    const s = state[p.id];
+    const total = s ? Object.values(s.counts).reduce((a, b) => a + b, 0) : 0;
+    const show = p.closed || !!(s && s.mine);
+    const rows = p.options.map(o => {
+      if(show){
+        const c = s ? (s.counts[o.id] || 0) : 0;
+        const pct = total ? Math.round(c * 100 / total) : 0;
+        const mine = s && s.mine === o.id;
+        return `<div class="opt res ${mine ? 'mine' : ''}"><i style="width:${pct}%"></i><span>${o.label}</span><b>${pct}%</b></div>`;
+      }
+      return `<button class="opt ${sel[p.id] === o.id ? 'on' : ''}" data-p="${p.id}" data-o="${o.id}"><span>${o.label}</span></button>`;
+    }).join('');
+    const foot = show
+      ? `<span>${total} صوت</span>${p.closed ? '<span class="tag">انتهى التصويت</span>' : '<span class="tag">تم تسجيل صوتك</span>'}`
+      : `<span>اختر خيار واحد</span><button class="go" data-go="${p.id}" ${sel[p.id] ? '' : 'disabled'}>سجّل صوتي</button>`;
+    return `<article class="poll"><h2>${p.question}</h2><div class="opts">${rows}</div><div class="foot">${foot}</div></article>`;
+  }
+
+  function render(){
+    if(!polls.length){
+      box.innerHTML = failed
+        ? `<div class="msg">التصويت متوقف مؤقتاً، جرّب بعد شوي.<br><small>رمز الخطأ: ${failCode}</small></div>`
+        : '<div class="msg">جارِ التحميل…</div>';
+      return;
+    }
+    box.innerHTML = polls.map(card).join('');
+  }
+
+  async function refresh(){
+    try{
+      const r = await fetch('/api/vote');
+      if(!r.ok) throw new Error(r.status);
+      const d = await r.json();
+      polls = d.polls;
+      d.results.forEach(s => state[s.id] = s);
+      failed = false;
+    }catch(e){ failed = true; failCode = e.message || 'network'; }
+    render();
+  }
+
+  box.addEventListener('click', async e => {
+    const o = e.target.closest('[data-o]');
+    if(o){ sel[o.dataset.p] = o.dataset.o; return render(); }
+    const g = e.target.closest('[data-go]');
+    if(!g || g.disabled) return;
+    g.disabled = true;
+    const id = g.dataset.go;
+    try{
+      const r = await fetch('/api/vote', {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({poll: id, option: sel[id]})
+      });
+      if(!r.ok) throw new Error(r.status);
+      state[id] = await r.json();
+    }catch(err){ alert('ما انحسب صوتك، حاول مرة ثانية.'); }
+    render();
+  });
+
+  render();
+  refresh();
+  setInterval(refresh, 20000);
+</script>
+</body>
+</html>
