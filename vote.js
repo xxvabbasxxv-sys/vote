@@ -53,7 +53,7 @@ module.exports = async (req, res) => {
     }
     const out = [];
     for (const p of polls) out.push(await snapshot(p, who));
-    res.json({ polls: polls.map(p => ({ ...p, closed: !!isClosed(p) })), results: out, now: Date.now() });
+    res.json({ polls: polls.map(p => ({ ...p, closed: !!isClosed(p) })), results: out, now: Date.now(), v: 4 });
   } catch (e) {
     res.status(500).json({ error: 'server' });
   }
