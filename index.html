@@ -68,15 +68,18 @@
   .pills{display:flex; justify-content:center; gap:30px; margin:-8px 0 34px; pointer-events:none;}
   .hand{--c:#b06bff; width:112px; text-align:center;}
   .hand.blue{--c:#5ccfff;}
-  .hname{font-size:26px; font-weight:900; letter-spacing:.12em; color:var(--c); text-shadow:0 0 18px var(--c); line-height:1.2; margin-bottom:6px;}
+  .hname{font-size:26px; font-weight:900; letter-spacing:.12em; color:var(--c); text-shadow:0 0 18px var(--c); line-height:1.2; margin-bottom:6px; transition:color .8s ease, text-shadow .8s ease;}
   .hsvg{width:100%; display:block; -webkit-mask-image:linear-gradient(#000 70%, transparent); mask-image:linear-gradient(#000 70%, transparent);}
   .hand.blue .hsvg{transform:scaleX(-1);}
   .g-fill{fill:var(--c); fill-opacity:.13;}
   .g-shine{fill:url(#glassShine);}
   .g-line{fill:none; stroke:var(--c); stroke-width:1.4; stroke-linecap:round; opacity:.5;}
   .g-edge{fill:none; stroke:var(--c); stroke-width:2.4; stroke-linejoin:round;}
-  .hsvg{filter:drop-shadow(0 0 7px var(--c));}
-  .bob{filter:drop-shadow(0 0 6px var(--c));}
+  .hsvg{opacity:.5; filter:grayscale(.8) drop-shadow(0 0 0 transparent); transition:opacity .8s ease, filter .8s ease;}
+  .bob{filter:drop-shadow(0 0 0 transparent); transition:filter .8s ease;}
+  .hand.lit .hsvg{opacity:1; filter:grayscale(0) drop-shadow(0 0 9px var(--c));}
+  .hand.lit .bob{filter:drop-shadow(0 0 7px var(--c));}
+  .hand:not(.lit) .hname{color:var(--muted); text-shadow:none;}
   .pill-body{fill:var(--c);}
   .bob{animation:bob 4s ease-in-out infinite;}
   @keyframes bob{0%,100%{transform:translateY(0);} 50%{transform:translateY(-5px);}}
@@ -171,6 +174,15 @@
     return `<article class="poll"><h2>${p.question}</h2>${p.endsAt && !p.closed ? timerHtml(p) : ''}<div class="opts">${rows}</div><div class="foot">${foot}</div></article>`;
   }
 
+  let litSide = null;
+  function paint(){
+    const p = polls[0], s = p && state[p.id];
+    litSide = (s && s.mine) || null;
+    const hp = document.querySelector('.hand.purple'), hb = document.querySelector('.hand.blue');
+    if(hp) hp.classList.toggle('lit', litSide === 'yes');
+    if(hb) hb.classList.toggle('lit', litSide === 'no');
+  }
+
   function tally(){
     const p = polls[0], s = p && state[p.id];
     document.getElementById('tally').innerHTML = p
@@ -180,6 +192,7 @@
 
   function render(){
     tally();
+    paint();
     if(!polls.length){
       box.innerHTML = failed
         ? `<div class="msg">التصويت متوقف مؤقتاً، جرّب بعد شوي.<br><small>رمز الخطأ: ${failCode}</small></div>`
@@ -241,8 +254,8 @@
     if(!ctx) return;
     const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
     const SIDES = [
-      {text: 'Elite State', rgb: '92,207,255', half: 0},
-      {text: 'Respect Club', rgb: '176,107,255', half: 1}
+      {text: 'Elite State', rgb: '92,207,255', half: 0, opt: 'no', k: 0},
+      {text: 'Respect Club', rgb: '176,107,255', half: 1, opt: 'yes', k: 0}
     ];
     const mouse = {x: -9999, y: -9999, vx: 0, vy: 0, on: false};
     let W = 0, H = 0, items = [], last = 0;
@@ -275,6 +288,7 @@
 
     function step(dt){
       const R = 90, k = dt * 60;
+      SIDES.forEach(s => { s.k += ((litSide === s.opt ? 1 : 0) - s.k) * Math.min(1, dt * 3); });
       items.forEach(it => {
         it.y += it.speed * dt; it.sway += dt * .8;
         const [px, py] = pos(it);
@@ -305,13 +319,14 @@
       items.forEach(it => {
         const [px, py] = pos(it);
         const edge = Math.max(0, Math.min(1, py / 90, (H - py) / 90));
-        const a = (.10 + it.d * .30 + it.hot * .45) * edge;
+        const lit = it.s.k;
+        const a = ((.10 + it.d * .30) * (.3 + .7 * lit) + it.hot * .45) * edge;
         if(a <= .01) return;
         ctx.save();
         ctx.translate(px, py); ctx.rotate(it.rot + it.orot);
         ctx.font = `800 ${it.size}px Tajawal, sans-serif`;
         ctx.fillStyle = `rgba(${it.s.rgb},${Math.min(a, 1)})`;
-        if(it.d > .65 || it.hot > .2){ ctx.shadowColor = `rgba(${it.s.rgb},.7)`; ctx.shadowBlur = 8 + it.hot * 14; }
+        if((it.d > .65 && lit > .5) || it.hot > .2){ ctx.shadowColor = `rgba(${it.s.rgb},.7)`; ctx.shadowBlur = 8 * Math.max(lit, it.hot) + it.hot * 14; }
         ctx.fillText(it.s.text, 0, 0);
         ctx.restore();
       });
@@ -323,7 +338,8 @@
     }
 
     build();
-    if(reduce) draw(); else requestAnimationFrame(frame);
+    if(reduce){ draw(); setInterval(() => { SIDES.forEach(s => { s.k = litSide === s.opt ? 1 : 0; }); draw(); }, 800); }
+    else requestAnimationFrame(frame);
     window.addEventListener('resize', () => { build(); if(reduce) draw(); });
     window.addEventListener('pointermove', e => {
       mouse.vx = mouse.on ? e.clientX - mouse.x : 0; mouse.vy = mouse.on ? e.clientY - mouse.y : 0;
