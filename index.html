@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Elite State | التصويت</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#05070a; --panel:#0c121a; --panel2:#111925;
+    --primary:#9bd9ff; --gold:#c9a24b; --light:#eaf6ff;
+    --text:#e9f1f8; --muted:#7c8ca0;
+    --border:rgba(155,217,255,.16); --border-strong:rgba(155,217,255,.34);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:
+      radial-gradient(60% 420px at 50% -80px, rgba(234,246,255,.16), transparent 70%),
+      radial-gradient(40% 300px at 85% 0, rgba(155,217,255,.10), transparent 70%),
+      var(--bg);
+    color:var(--text); font-family:'Tajawal',sans-serif; line-height:1.75; min-height:100vh;
+  }
+  main{position:relative; max-width:720px; margin:0 auto; padding:56px 20px 90px;}
+  .brand{display:flex; align-items:center; gap:14px; justify-content:center; margin-bottom:34px;}
+  .brand img{width:52px; height:52px; border-radius:50%; object-fit:cover; border:2px solid var(--border-strong);}
+  .brand b{font-size:20px; font-weight:900; letter-spacing:2px; color:var(--light);}
+  h1{font-size:clamp(30px,6vw,46px); font-weight:900; text-align:center; color:var(--light); text-shadow:0 0 36px rgba(234,246,255,.25);}
+  .sub{text-align:center; color:var(--muted); margin:10px 0 40px;}
+  .poll{
+    background:linear-gradient(180deg,var(--panel2),var(--panel));
+    border:1px solid var(--border); border-top:1px solid rgba(234,246,255,.45);
+    border-radius:16px; padding:26px 24px 20px; margin-bottom:22px;
+  }
+  .poll h2{font-size:19px; font-weight:800; margin-bottom:18px;}
+  .opts{display:flex; flex-direction:column; gap:10px;}
+  .opt{
+    position:relative; overflow:hidden; display:flex; align-items:center; justify-content:space-between; gap:12px;
+    width:100%; padding:14px 18px; border-radius:11px; font:inherit; font-weight:700; font-size:15px; text-align:right;
+    background:var(--bg); color:var(--text); border:1px solid var(--border);
+  }
+  button.opt{cursor:pointer; transition:border-color .15s, background .15s;}
+  button.opt:hover{border-color:var(--primary);}
+  button.opt.on{border-color:var(--light); background:rgba(234,246,255,.10); color:var(--light);}
+  .opt span,.opt b{position:relative; z-index:1;}
+  .res i{position:absolute; inset:0 auto 0 0; background:rgba(155,217,255,.16); transition:width .6s ease;}
+  .res.mine{border-color:var(--light);}
+  .res.mine i{background:linear-gradient(90deg,rgba(201,162,75,.30),rgba(234,246,255,.38));}
+  .res b{color:var(--primary); font-variant-numeric:tabular-nums;}
+  .res.mine b{color:var(--light);}
+  .foot{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:16px; color:var(--muted); font-size:13px;}
+  .go{
+    font:inherit; font-weight:800; font-size:14px; padding:10px 26px; border-radius:10px; cursor:pointer;
+    background:linear-gradient(180deg,var(--light),var(--primary)); color:#05070a; border:0;
+  }
+  .go:disabled{opacity:.35; cursor:not-allowed;}
+  .timer{margin:0 0 20px; padding:14px; border:1px solid var(--border); border-radius:12px; background:rgba(234,246,255,.04);}
+  .tu{display:flex; gap:10px;}
+  .tu div{flex:1; text-align:center; background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:8px 4px;}
+  .tu b{display:block; font-size:24px; font-weight:900; color:var(--light); font-variant-numeric:tabular-nums; line-height:1.4;}
+  .tu small{color:var(--muted); font-size:12px;}
+  .te{display:block; margin-top:10px; font-size:12.5px; color:var(--gold); text-align:center;}
+  .tag{color:var(--gold); font-weight:700;}
+  em{font-style:normal; font-size:12px; color:var(--gold); margin-inline-start:8px;}
+  .msg{border:1px dashed var(--border-strong); border-radius:12px; padding:16px 20px; text-align:center; color:var(--muted);}
+  /* ---- اليدين والحبتين ---- */
+  .pills{display:flex; justify-content:center; gap:30px; margin:-8px 0 34px; pointer-events:none;}
+  .hand{--c:#b06bff; width:112px; text-align:center;}
+  .hand.blue{--c:#5ccfff;}
+  .hname{font-size:26px; font-weight:900; letter-spacing:.12em; color:var(--c); text-shadow:0 0 18px var(--c); line-height:1.2; margin-bottom:6px; transition:color .8s ease, text-shadow .8s ease;}
+  .hsvg{width:100%; display:block; -webkit-mask-image:linear-gradient(#000 70%, transparent); mask-image:linear-gradient(#000 70%, transparent);}
+  .hand.blue .hsvg{transform:scaleX(-1);}
+  .g-fill{fill:var(--c); fill-opacity:.13;}
+  .g-shine{fill:url(#glassShine);}
+  .g-line{fill:none; stroke:var(--c); stroke-width:1.4; stroke-linecap:round; opacity:.5;}
+  .g-edge{fill:none; stroke:var(--c); stroke-width:2.4; stroke-linejoin:round;}
+  .hsvg{opacity:.5; filter:grayscale(.8) drop-shadow(0 0 0 transparent); transition:opacity .8s ease, filter .8s ease;}
+  .bob{filter:drop-shadow(0 0 0 transparent); transition:filter .8s ease;}
+  .hand.lit .hsvg{opacity:1; filter:grayscale(0) drop-shadow(0 0 9px var(--c));}
+  .hand.lit .bob{filter:drop-shadow(0 0 7px var(--c));}
+  .hand:not(.lit) .hname{color:var(--muted); text-shadow:none;}
+  .pill-body{fill:var(--c);}
+  .bob{animation:bob 4s ease-in-out infinite;}
+  @keyframes bob{0%,100%{transform:translateY(0);} 50%{transform:translateY(-5px);}}
+  @media (min-width:1180px){
+    .pills{display:block; height:0; margin:0;}
+    .hand{position:absolute; top:230px; width:190px;}
+    .hand.purple{left:calc(100% + 28px);}
+    .hand.blue{right:calc(100% + 28px);}
+    .hname{font-size:36px;}
+  }
+  .tally{position:absolute; top:16px; left:16px; z-index:5; display:flex; gap:8px;}
+  .tally div{min-width:66px; text-align:center; padding:6px 12px; border:1px solid var(--border-strong); border-radius:11px; background:rgba(12,18,26,.82); backdrop-filter:blur(6px);}
+  .tally b{display:block; font-size:22px; font-weight:900; line-height:1.3; font-variant-numeric:tabular-nums;}
+  .tally span{font-size:12px; color:var(--muted); font-weight:700;}
+  .tally .t-yes{border-color:rgba(176,107,255,.55);}
+  .tally .t-yes b{color:#c28bff;}
+  .tally .t-no{border-color:rgba(92,207,255,.55);}
+  .tally .t-no b{color:#5ccfff;}
+  @media (max-width:640px){ .tally{position:static; justify-content:center; padding-top:14px;} }
+  :root{--p:.4;}
+  /* صور الجانبين: اليسار Elite State يخفت مع الوقت، واليمين Respect Club يتضح مع اقتراب النهاية */
+  .art{position:fixed; top:0; bottom:0; width:50%; z-index:0; pointer-events:none; overflow:hidden;}
+  .art-l{left:0;} .art-r{right:0;}
+  .art .bg{position:absolute; inset:0; background-size:cover; background-position:center;}
+  .art-l .bg{background-image:url(assets/el-banner.webp); opacity:calc(.36 - .2 * var(--p));
+    -webkit-mask-image:linear-gradient(to right,#000 35%,transparent 100%); mask-image:linear-gradient(to right,#000 35%,transparent 100%);}
+  .art-r .bg{background-image:url(assets/rc-city.webp); opacity:calc(.2 + .32 * var(--p)); filter:blur(calc(14px * (1 - var(--p))));
+    -webkit-mask-image:linear-gradient(to left,#000 35%,transparent 100%); mask-image:linear-gradient(to left,#000 35%,transparent 100%);}
+  .art img{position:absolute; height:auto; -webkit-mask-image:radial-gradient(ellipse at center,#000 58%,transparent 100%); mask-image:radial-gradient(ellipse at center,#000 58%,transparent 100%);}
+  .art-l img{opacity:calc(var(--o) * (1 - .5 * var(--p)));}
+  .art-r img{opacity:calc(var(--o) * (.55 + .45 * var(--p))); filter:blur(calc(7px * (1 - var(--p))));}
+  .art-l .medal{--o:.55; left:8%; bottom:150px; width:190px;}
+  .art-l .wm{--o:.5; left:24px; bottom:18px; width:210px;}
+  .art-r .wel{--o:.45; right:28px; top:76px; width:min(420px,34vw);}
+  .art-r .lg{--o:.5; right:8%; bottom:150px; width:230px;}
+  .art-r .con{--o:.5; right:28px; bottom:18px; width:min(430px,34vw);}
+  .note{width:170px; margin:-8px -29px 0; text-align:center; transition:opacity .8s ease;}
+  .hand:not(.lit) .note{opacity:.5;}
+  .note b{display:block; font-size:19px; font-weight:900; color:var(--c); text-shadow:0 0 14px var(--c); line-height:1.5;}
+  .note span{display:block; font-size:12px; font-weight:800; letter-spacing:.14em; color:var(--muted);}
+  .note small{display:block; margin-top:4px; font-size:12px; line-height:1.6; color:var(--muted);}
+  .note .bar{height:4px; width:150px; margin:8px auto 4px; border-radius:4px; background:rgba(255,255,255,.1); overflow:hidden;}
+  .note .bar i{display:block; height:100%; width:calc(var(--p) * 100%); border-radius:4px; background:linear-gradient(90deg,var(--c),#fff);}
+  @media (min-width:1180px){ .note{width:190px; margin:-8px 0 0;} }
+  @media (max-width:900px){ .art img{display:none;} }
+  #rain{position:fixed; inset:0; width:100%; height:100%; z-index:0; pointer-events:none;}
+  :focus-visible{outline:2px solid var(--light); outline-offset:2px;}
+  @media (prefers-reduced-motion:reduce){*{transition:none !important;}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="glassShine" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".24"/><stop offset=".6" stop-color="#fff" stop-opacity=".04"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient><linearGradient id="pillShade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".6"/><stop offset=".45" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".4"/></linearGradient><path id="gShape" d="M50.8 197.7 L49.9 199.0 L48.3 199.1 L37.9 194.6 L15.1 183.7 L6.6 180.2 L-0.1 178.4 L-2.2 178.3 L-5.1 178.9 L-7.9 179.9 L-9.7 181.1 L-11.8 183.1 L-13.5 185.4 L-14.3 187.4 L-14.9 190.2 L-14.8 193.8 L-13.7 197.4 L-11.8 200.5 L-9.0 202.9 L-4.6 205.8 L4.3 210.5 L26.0 220.3 L33.5 224.0 L51.0 237.5 L60.4 244.2 L69.0 256.6 L72.0 262.0 L75.7 270.9 L79.8 283.2 L82.0 291.9 L82.2 294.9 L81.7 298.0 L78.9 306.9 L78.3 309.7 L78.2 312.2 L79.0 314.5 L80.8 316.5 L84.0 318.0 L89.0 319.2 L95.6 320.1 L103.7 320.7 L122.0 321.2 L140.3 320.7 L148.4 320.1 L155.0 319.2 L160.0 318.0 L163.2 316.5 L165.0 314.5 L165.8 312.2 L165.7 309.6 L165.1 306.7 L162.3 297.9 L161.8 295.0 L162.0 292.0 L162.7 289.3 L166.2 278.1 L172.0 264.0 L174.7 258.5 L182.3 245.0 L184.9 239.1 L188.9 225.6 L191.1 214.4 L192.1 203.4 L191.5 193.3 L190.6 186.7 L188.9 180.5 L187.7 177.5 L186.1 174.7 L183.0 170.9 L182.6 169.8 L185.1 152.5 L188.9 135.9 L192.8 122.3 L198.5 107.4 L201.1 99.7 L202.2 95.7 L202.5 93.6 L202.3 91.5 L201.5 89.0 L200.4 87.2 L198.9 85.6 L196.6 84.2 L194.6 83.6 L192.0 83.4 L189.9 83.8 L187.4 84.9 L185.7 86.2 L184.2 88.1 L181.3 94.0 L173.3 114.0 L167.7 134.7 L160.2 159.7 L159.5 160.5 L158.5 160.8 L153.4 159.7 L152.6 158.3 L152.7 139.1 L154.2 119.2 L157.0 98.7 L163.4 69.9 L164.1 65.2 L164.2 61.2 L163.5 58.2 L161.5 54.9 L159.2 52.7 L156.3 51.3 L153.3 50.6 L150.0 50.9 L147.1 51.9 L144.4 53.8 L142.0 56.7 L139.8 62.3 L133.1 90.0 L129.7 117.3 L126.6 136.6 L124.2 154.8 L123.6 155.7 L122.9 156.1 L120.4 156.0 L119.7 155.4 L119.3 154.6 L117.1 131.5 L116.6 111.2 L117.3 87.7 L120.9 56.2 L121.2 51.9 L121.0 47.3 L120.0 44.2 L118.1 41.2 L116.1 39.2 L113.1 37.5 L109.8 36.6 L107.1 36.6 L103.7 37.4 L101.3 38.6 L99.0 40.5 L97.6 42.1 L96.4 44.3 L95.5 47.0 L94.1 54.1 L91.1 76.2 L90.3 86.0 L90.1 108.5 L88.9 133.0 L88.4 160.1 L87.6 161.4 L86.1 161.7 L85.3 161.3 L84.8 160.4 L81.1 140.6 L79.0 122.3 L77.7 99.8 L78.6 70.9 L78.5 66.9 L77.9 62.6 L76.7 59.7 L75.1 57.5 L72.6 55.3 L70.2 54.1 L67.0 53.3 L64.4 53.4 L61.2 54.3 L58.9 55.6 L56.8 57.4 L55.2 59.5 L54.2 61.8 L53.6 64.5 L52.8 72.2 L51.8 94.8 L52.0 100.4 L53.8 123.0 L54.5 142.3 L55.5 159.4 L57.4 178.6 L54.3 184.1 L53.1 187.2 L51.4 193.4Z"/><g id="gDetails"><path d="M58.2 130.0 Q66.7 127.4 75.5 128.8"/><path d="M56.0 98.1 Q64.8 96.0 73.6 97.9"/><path d="M94.0 118.9 Q103.2 117.0 112.3 119.2"/><path d="M94.7 83.9 Q104.1 82.6 113.1 85.3"/><path d="M132.6 125.2 Q141.2 124.2 149.4 127.2"/><path d="M136.6 92.9 Q145.4 92.5 153.4 96.0"/><path d="M169.3 141.4 Q176.8 141.3 183.2 145.1"/><path d="M176.3 115.9 Q183.7 116.3 189.9 120.4"/><path d="M30.0 217.1 Q32.2 207.5 38.1 199.7"/><path d="M84 178 C66 198 68 228 90 254"/><path d="M70 188 C100 192 130 202 166 216"/><path d="M176 176 C150 168 118 168 92 180"/></g></defs></svg>
+<div class="art art-l" aria-hidden="true">
+  <div class="bg"></div>
+  <img class="wm" src="assets/el-logo.webp" alt="" loading="lazy">
+  <img class="medal" src="assets/el-round.webp" alt="" loading="lazy">
+</div>
+<div class="art art-r" aria-hidden="true">
+  <div class="bg"></div>
+  <img class="wel" src="assets/rc-welcome.webp" alt="" loading="lazy">
+  <img class="lg" src="assets/rc-logo.webp" alt="" loading="lazy">
+  <img class="con" src="assets/rc-connect.webp" alt="" loading="lazy">
+</div>
+<canvas id="rain" aria-hidden="true"></canvas>
+<div class="tally" id="tally" aria-live="polite"></div>
+<main>
+  <div class="brand">
+    <img src="https://i.ibb.co/d0QxHd04/magic-edit-TUFIUUhk-VFl5-Ykkj-MSNi-OTVh-MTg0-NWQ2-YTZl-ODgx-Mm-Qz-Mj-Fl-ZWJh-NWQy-ZDNm-MSMx-Mj-E2-Iy-NUU.png" alt="شعار Elite State">
+    <b>ELITE STATE</b>
+  </div>
+  <h1>صوتك يقرر</h1>
+  <p class="sub">لكل شخص صوت واحد، وتقدر تغيّره بأي وقت.</p>
+  <div class="pills" aria-hidden="true">
+    <div class="hand purple">
+      <div class="hname">CL</div>
+      <svg class="hsvg" viewBox="-30 0 270 320"><use href="#gShape" class="g-fill"/><use href="#gShape" class="g-shine"/><use href="#gDetails" class="g-line"/><use href="#gShape" class="g-edge"/><ellipse cx="128" cy="218" rx="34" ry="11" fill="#000" opacity=".35"/><g class="bob"><g transform="translate(122 206)"><g transform="rotate(-28)"><rect class="pill-body" x="-31" y="-15" width="62" height="30" rx="15"/><rect x="-31" y="-15" width="62" height="30" rx="15" fill="url(#pillShade)"/><rect x="-1.2" y="-15" width="2.4" height="30" fill="#000" opacity=".22"/><rect x="-24" y="-11" width="30" height="6" rx="3" fill="#fff" opacity=".5"/></g></g></g></svg>
+      <div class="note"><b>شي جديد قادم…</b><div class="bar"><i></i></div><small id="tz">بداية جديدة تقترب بهدوء</small></div>
+    </div>
+    <div class="hand blue">
+      <div class="hname">EL</div>
+      <svg class="hsvg" viewBox="-30 0 270 320"><use href="#gShape" class="g-fill"/><use href="#gShape" class="g-shine"/><use href="#gDetails" class="g-line"/><use href="#gShape" class="g-edge"/><ellipse cx="128" cy="218" rx="34" ry="11" fill="#000" opacity=".35"/><g class="bob"><g transform="translate(122 206)"><g transform="rotate(-28)"><rect class="pill-body" x="-31" y="-15" width="62" height="30" rx="15"/><rect x="-31" y="-15" width="62" height="30" rx="15" fill="url(#pillShade)"/><rect x="-1.2" y="-15" width="2.4" height="30" fill="#000" opacity=".22"/><rect x="-24" y="-11" width="30" height="6" rx="3" fill="#fff" opacity=".5"/></g></g></g></svg>
+      <div class="note"><b>وداعاً</b><span>ELITE STATE</span><small>شكراً على كل لحظة وذكرى</small></div>
+    </div>
+  </div>
+  <div id="polls"></div>
+</main>
+
+<script>
+  let polls = [], state = {}, failed = false, failCode = '', offset = 0, bestRtt = Infinity;
+  const now = () => Date.now() + offset;
+  const unitsHtml = ms => {
+    const t = Math.max(0, Math.ceil(ms / 1000));
+    return [['يوم', Math.floor(t / 86400)], ['ساعة', Math.floor(t % 86400 / 3600)], ['دقيقة', Math.floor(t % 3600 / 60)], ['ثانية', t % 60]]
+      .map(([l, n]) => `<div><b>${String(n).padStart(2, '0')}</b><small>${l}</small></div>`).join('');
+  };
+  const endLabel = iso => new Date(iso).toLocaleString('ar-u-nu-latn', {timeZone: 'Asia/Riyadh', weekday: 'long', day: 'numeric', month: 'long', hour: 'numeric', minute: '2-digit'});
+  const timerHtml = p => `<div class="timer" data-end="${p.endsAt}"><div class="tu">${unitsHtml(Date.parse(p.endsAt) - now())}</div><span class="te">ينتهي ${endLabel(p.endsAt)} بتوقيت مكة المكرمة</span></div>`;
+  let lastP = -1;
+  function artUpdate(){
+    const p0 = polls[0];
+    if(!p0 || !p0.endsAt) return;
+    const end = Date.parse(p0.endsAt), start = p0.startsAt ? Date.parse(p0.startsAt) : end - 5.5 * 864e5, left = end - now();
+    const p = p0.closed || left <= 0 ? 1 : Math.round(Math.min(1, Math.max(0, (now() - start) / (end - start))) * 100) / 100;
+    if(p !== lastP){ lastP = p; document.documentElement.style.setProperty('--p', p); }
+    const msg = (p0.closed || left <= 0) ? 'انتهى التصويت… شكراً لكل صوت'
+      : left < 36e5 ? 'دقايق وتنكشف النتيجة…'
+      : left < 864e5 ? 'آخر 24 ساعة، كل صوت يفرق'
+      : left < 3 * 864e5 ? 'العد التنازلي بدأ… قرّبنا'
+      : 'بداية جديدة تقترب بهدوء';
+    const el = document.getElementById('tz');
+    if(el && el.textContent !== msg) el.textContent = msg;
+  }
+
+  function tick(){
+    artUpdate();
+    document.querySelectorAll('.timer').forEach(el => {
+      const left = Date.parse(el.dataset.end) - now();
+      if(left <= 0){
+        polls.filter(x => x.endsAt === el.dataset.end).forEach(x => x.closed = true);
+        render(); refresh();
+        return;
+      }
+      el.querySelector('.tu').innerHTML = unitsHtml(left);
+    });
+  }
+  const box = document.getElementById('polls');
+
+  function card(p){
+    const s = state[p.id];
+    const total = s ? Object.values(s.counts).reduce((a, b) => a + b, 0) : 0;
+    const voted = !!(s && s.mine);
+    const rows = p.options.map(o => {
+      const data = p.closed ? '' : `data-p="${p.id}" data-o="${o.id}"`;
+      if(!voted && !p.closed){
+        return `<button class="opt" ${data}><span>${o.label}</span></button>`;
+      }
+      const c = s ? (s.counts[o.id] || 0) : 0;
+      const pct = total ? Math.round(c * 100 / total) : 0;
+      const mine = voted && s.mine === o.id;
+      const tag = p.closed ? 'div' : 'button';
+      return `<${tag} class="opt res ${mine ? 'mine' : ''}" ${data}><i style="width:${pct}%"></i><span>${o.label}${mine ? '<em>صوتك</em>' : ''}</span><b>${pct}%</b></${tag}>`;
+    }).join('');
+    const foot = p.closed
+      ? `<span>${total} صوت</span><span class="tag">انتهى التصويت</span>`
+      : voted
+        ? `<span>${total} صوت</span><span class="tag">اضغط على أي خيار لتغيير صوتك</span>`
+        : `<span>اختر خيارك عشان تشوف النتائج</span>`;
+    return `<article class="poll"><h2>${p.question}</h2>${p.endsAt && !p.closed ? timerHtml(p) : ''}<div class="opts">${rows}</div><div class="foot">${foot}</div></article>`;
+  }
+
+  let litSide = null;
+  function paint(){
+    const p = polls[0], s = p && state[p.id];
+    litSide = (s && s.mine) || null;
+    const hp = document.querySelector('.hand.purple'), hb = document.querySelector('.hand.blue');
+    if(hp) hp.classList.toggle('lit', litSide === 'yes');
+    if(hb) hb.classList.toggle('lit', litSide === 'no');
+  }
+
+  function tally(){
+    const p = polls[0], s = p && state[p.id];
+    document.getElementById('tally').innerHTML = p
+      ? p.options.map(o => `<div class="t-${o.id}" title="${o.label}"><b>${s ? (s.counts[o.id] || 0) : '–'}</b><span>${o.short || o.label}</span></div>`).join('')
+      : '';
+  }
+
+  function render(){
+    tally();
+    paint();
+    if(!polls.length){
+      box.innerHTML = failed
+        ? `<div class="msg">التصويت متوقف مؤقتاً، جرّب بعد شوي.<br><small>رمز الخطأ: ${failCode}</small></div>`
+        : '<div class="msg">جارِ التحميل…</div>';
+      return;
+    }
+    box.innerHTML = polls.map(card).join('');
+  }
+
+  async function refresh(){
+    try{
+      const t0 = Date.now();
+      const r = await fetch('/api/vote', {cache: 'no-store'});
+      if(!r.ok) throw new Error(r.status);
+      const d = await r.json();
+      const t1 = Date.now();
+      if(d.now && (t1 - t0) <= bestRtt * 1.25 + 40){
+        bestRtt = Math.min(bestRtt, t1 - t0);
+        offset = d.now - (t0 + t1) / 2;
+      }
+      polls = d.polls;
+      d.results.forEach(s => state[s.id] = s);
+      failed = false;
+    }catch(e){ failed = true; failCode = e.message || 'network'; }
+    render();
+  }
+
+  box.addEventListener('click', async e => {
+    const o = e.target.closest('[data-o]');
+    if(!o) return;
+    const id = o.dataset.p, opt = o.dataset.o;
+    if(state[id] && state[id].mine === opt) return;
+    o.disabled = true;
+    try{
+      const r = await fetch('/api/vote', {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({poll: id, option: opt})
+      });
+      if(!r.ok) throw new Error(r.status);
+      state[id] = await r.json();
+      if(state[id].mine !== opt) alert('ما اتغيّر صوتك. غالباً ملف api/vote.js على GitHub قديم، حدّثه.');
+    }catch(err){ alert('ما انحسب صوتك، حاول مرة ثانية.'); }
+    render();
+  });
+
+  render();
+  refresh();
+  setInterval(refresh, 20000);
+  (function loop(){
+    tick();
+    setTimeout(loop, 1000 - (now() % 1000) + 5); // يصحى مع بداية كل ثانية من ساعة الخادم
+  })();
+  document.addEventListener('visibilitychange', () => { if(!document.hidden){ tick(); refresh(); } });
+
+  // ---- كلمات تتساقط: Elite State يسار / Respect Club يمين، وتتحرك مع الماوس ----
+  (function(){
+    const cv = document.getElementById('rain');
+    const ctx = cv && cv.getContext && cv.getContext('2d');
+    if(!ctx) return;
+    const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const SIDES = [
+      {text: 'Elite State', rgb: '92,207,255', half: 0, opt: 'no', k: 0},
+      {text: 'Respect Club', rgb: '176,107,255', half: 1, opt: 'yes', k: 0}
+    ];
+    const mouse = {x: -9999, y: -9999, vx: 0, vy: 0, on: false};
+    let W = 0, H = 0, items = [], last = 0;
+
+    function spawn(s, scatter){
+      const d = Math.random(), size = 13 + d * 19;
+      ctx.font = `800 ${size}px Tajawal, sans-serif`;
+      return {
+        s, d, size, w: ctx.measureText(s.text).width,
+        speed: 16 + d * 40,
+        x: (s.half ? W / 2 : 0) + Math.random() * W / 2,
+        y: scatter ? Math.random() * H : -size - Math.random() * H * .4,
+        sway: Math.random() * 6.28, amp: 4 + Math.random() * 10,
+        rot: (Math.random() - .5) * .5,
+        ox: 0, oy: 0, vx: 0, vy: 0, orot: 0, vr: 0, hot: 0
+      };
+    }
+
+    function build(){
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      W = innerWidth; H = innerHeight;
+      cv.width = W * dpr; cv.height = H * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      const per = Math.max(8, Math.min(30, Math.round(W / 60)));
+      items = [];
+      SIDES.forEach(s => { for(let i = 0; i < per; i++) items.push(spawn(s, true)); });
+    }
+
+    function pos(it){ return [it.x + Math.sin(it.sway) * it.amp + it.ox, it.y + it.oy]; }
+
+    function step(dt){
+      const R = 90, k = dt * 60;
+      SIDES.forEach(s => { s.k += ((litSide === s.opt ? 1 : 0) - s.k) * Math.min(1, dt * 3); });
+      items.forEach(it => {
+        it.y += it.speed * dt; it.sway += dt * .8;
+        const [px, py] = pos(it);
+        let hot = 0;
+        if(mouse.on){
+          const dist = Math.hypot(Math.max(Math.abs(mouse.x - px) - it.w / 2, 0), Math.max(Math.abs(mouse.y - py) - it.size / 2, 0));
+          if(dist < R){
+            hot = 1 - dist / R;
+            const dx = px - mouse.x, dy = py - mouse.y, m = Math.hypot(dx, dy) || 1, push = hot * hot * 5 * k;
+            it.vx += dx / m * push + mouse.vx * .03 * hot;
+            it.vy += dy / m * push + mouse.vy * .03 * hot;
+            it.vr += (dx >= 0 ? 1 : -1) * hot * .012 * k;
+          }
+        }
+        it.hot += (hot - it.hot) * Math.min(1, dt * 8);
+        it.vx -= it.ox * .01 * k; it.vy -= it.oy * .01 * k; it.vr -= it.orot * .02 * k;
+        const damp = Math.pow(.9, k);
+        it.vx *= damp; it.vy *= damp; it.vr *= damp;
+        it.ox += it.vx * k; it.oy += it.vy * k; it.orot += it.vr * k;
+        if(py > H + 40) Object.assign(it, spawn(it.s, false));
+      });
+      mouse.vx *= .8; mouse.vy *= .8;
+    }
+
+    function draw(){
+      ctx.clearRect(0, 0, W, H);
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      items.forEach(it => {
+        const [px, py] = pos(it);
+        const edge = Math.max(0, Math.min(1, py / 90, (H - py) / 90));
+        const lit = it.s.k;
+        const a = ((.10 + it.d * .30) * (.3 + .7 * lit) + it.hot * .45) * edge;
+        if(a <= .01) return;
+        ctx.save();
+        ctx.translate(px, py); ctx.rotate(it.rot + it.orot);
+        ctx.font = `800 ${it.size}px Tajawal, sans-serif`;
+        ctx.fillStyle = `rgba(${it.s.rgb},${Math.min(a, 1)})`;
+        if((it.d > .65 && lit > .5) || it.hot > .2){ ctx.shadowColor = `rgba(${it.s.rgb},.7)`; ctx.shadowBlur = 8 * Math.max(lit, it.hot) + it.hot * 14; }
+        ctx.fillText(it.s.text, 0, 0);
+        ctx.restore();
+      });
+    }
+
+    function frame(t){
+      const dt = Math.min(.05, (t - last) / 1000 || 0); last = t;
+      step(dt); draw(); requestAnimationFrame(frame);
+    }
+
+    build();
+    if(reduce){ draw(); setInterval(() => { SIDES.forEach(s => { s.k = litSide === s.opt ? 1 : 0; }); draw(); }, 800); }
+    else requestAnimationFrame(frame);
+    window.addEventListener('resize', () => { build(); if(reduce) draw(); });
+    window.addEventListener('pointermove', e => {
+      mouse.vx = mouse.on ? e.clientX - mouse.x : 0; mouse.vy = mouse.on ? e.clientY - mouse.y : 0;
+      mouse.x = e.clientX; mouse.y = e.clientY; mouse.on = true;
+    });
+    document.documentElement.addEventListener('mouseleave', () => { mouse.on = false; });
+    if(document.fonts && document.fonts.ready) document.fonts.ready.then(() => { build(); if(reduce) draw(); });
+  })();
+</script>
+</body>
+</html>
